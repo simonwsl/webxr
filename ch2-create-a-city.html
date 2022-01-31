@@ -37,6 +37,8 @@
                 camera.position.x = -45 * Math.PI / 180;
 
                 renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.shadowMapEnabled = true;
+                renderer.shadowMapSoft = true;
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 document.body.appendChild(renderer.domElement);
             }
@@ -50,16 +52,36 @@
                 });
 
                 const floorMesh = new THREE.Mesh(geometry, material);
+                floorMesh.receiveShadow = true;
                 floorMesh.rotation.x = -90 * Math.PI / 180;
                 scene.add(floorMesh);
 
                 //original building
                 const geometry2 = new THREE.CubeGeometry(1, 1, 1);
                 geometry2.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0.5, 0));
-                const material2 = new THREE.MeshDepthMaterial({
-                    wireframe: true,
-                    overdraw: true
+                const material2 = new THREE.MeshPhongMaterial({
+                   // wireframe: true,
+                    overdraw: true,
+                    color: 0xcccccc
                 });
+
+                var light = new THREE.DirectionalLight(0xbbffbb, 1);
+                light.position.set(1, 3, 2);
+                light.castShadow = true;
+                light.shadowDarkness = 0.5;
+                light.shadowMapWidth = 2048;
+                light.shadowMapHeight = 2048;
+                light.position.set(500, 1500, 1000);
+                light.shadowCameraFar = 2500;
+                //DirectionalLight only; not necessary for PointLight
+                light.shadowCameraLeft = -1000;
+                light.shadowCameraRight = 1000;
+                light.shadowCameraTop = 1000;
+                light.shadowCameraBottom = -1000;
+                light.shadowCameraVisible = true;
+                scene.add(light);
+
+                scene.fog = new THREE.FogExp2(0x9db3b5, 0.002);
 
                 //cloned buildings
                 for (var i = 0; i < 300; i++) {
@@ -69,9 +91,11 @@
                     buildingMesh.scale.x = Math.random() * 50 + 10;
                     buildingMesh.scale.y = Math.random() * buildingMesh.scale.x * 8 + 8;
                     buildingMesh.scale.z = buildingMesh.scale.x;
+                
                     scene.add(buildingMesh);
                 }
-            }
+                }
+            
             setup();
 
         </script>
